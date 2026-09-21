@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix يقظة: روايات وألغاز العقل",
+  "description": "لعبة ذهنية عربية قائمة على روايات وألغاز تفاعلية بالذكاء الاصطناعي لتنشيط العقل ومنع إجهاد الشاشات",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
