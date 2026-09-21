@@ -134,13 +134,13 @@ export const BrainDashboard: React.FC<BrainDashboardProps> = ({ playerStats, cas
           <div className="bg-[#131b2d] border border-slate-800/80 rounded-xl p-4">
             <span className="text-xs text-slate-500">متوسط القضايا</span>
             <div className="mt-1 text-xl font-mono font-bold text-slate-100">
-              {averageScore === null ? "—" : `${averageScore}/100`}
+              {averageScore === null ? "لا يوجد" : `${averageScore}/100`}
             </div>
           </div>
           <div className="bg-[#131b2d] border border-slate-800/80 rounded-xl p-4">
             <span className="text-xs text-slate-500">أفضل نتيجة</span>
             <div className="mt-1 text-xl font-mono font-bold text-slate-100">
-              {bestScore === null ? "—" : `${bestScore}/100`}
+              {bestScore === null ? "لا يوجد" : `${bestScore}/100`}
             </div>
           </div>
           <div className="bg-[#131b2d] border border-slate-800/80 rounded-xl p-4">
