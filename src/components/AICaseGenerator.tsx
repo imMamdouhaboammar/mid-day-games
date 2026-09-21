@@ -113,6 +113,8 @@ export const AICaseGenerator: React.FC<AICaseGeneratorProps> = ({ onCaseCreated 
                 type="button"
                 key={g}
                 onClick={() => setGenre(g)}
+                aria-label={`اختيار التصنيف: ${g}`}
+                aria-pressed={genre === g}
                 className={`p-3 rounded-xl border text-right text-xs font-medium transition-all focus-visible:ring-2 focus-visible:ring-amber-500 card-bezel ${
                   genre === g
                     ? "bg-slate-800/95 border-amber-500/40 text-amber-300 card-bezel-active font-semibold"
@@ -137,6 +139,8 @@ export const AICaseGenerator: React.FC<AICaseGeneratorProps> = ({ onCaseCreated 
                 type="button"
                 key={d}
                 onClick={() => setDifficulty(d)}
+                aria-label={`اختيار مستوى الصعوبة: ${d}`}
+                aria-pressed={difficulty === d}
                 className={`p-2.5 rounded-xl border text-center text-xs font-medium transition-all focus-visible:ring-2 focus-visible:ring-amber-500 card-bezel ${
                   difficulty === d
                     ? "bg-slate-800/95 border-amber-500/40 text-amber-300 card-bezel-active font-semibold"
@@ -161,6 +165,8 @@ export const AICaseGenerator: React.FC<AICaseGeneratorProps> = ({ onCaseCreated 
                 type="button"
                 key={s}
                 onClick={() => setSkill(s)}
+                aria-label={`اختيار المهارة: ${s}`}
+                aria-pressed={skill === s}
                 className={`p-3 rounded-xl border text-right text-xs font-medium transition-all focus-visible:ring-2 focus-visible:ring-emerald-500 card-bezel ${
                   skill === s
                     ? "bg-slate-800/95 border-emerald-500/40 text-emerald-300 card-bezel-active font-semibold"
