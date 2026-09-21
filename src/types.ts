@@ -50,7 +50,7 @@ export interface SolvedRecord {
 }
 
 export interface PlayerStats {
-  sharpnessScore: number; // e.g. 100 - 999
+  sharpnessScore: number;
   streakDays: number;
   casesSolvedCount: number;
   quickGamesPlayed: number;
@@ -63,22 +63,12 @@ export interface PlayerStats {
 export type ActiveTab = "cases" | "reader" | "quick-gym" | "stats" | "custom-case";
 
 export const INITIAL_PLAYER_STATS: PlayerStats = {
-  sharpnessScore: 540,
-  streakDays: 4,
-  casesSolvedCount: 1,
-  quickGamesPlayed: 3,
-  totalBreakMinutes: 18,
-  lastPlayedDate: "اليوم",
-  favoriteGenre: "غموض تاريخي وبوليسي",
-  solvedCases: [
-    {
-      caseId: "case-idrisi-map",
-      caseTitle: "سر خريطة الإدريسي المفقودة",
-      solvedAt: "اليوم",
-      score: 95,
-      timeSpentSeconds: 210,
-      verdict: "استنتاج ثاقب وحاسم",
-    },
-  ],
+  sharpnessScore: 0,
+  streakDays: 0,
+  casesSolvedCount: 0,
+  quickGamesPlayed: 0,
+  totalBreakMinutes: 0,
+  lastPlayedDate: "",
+  favoriteGenre: "",
+  solvedCases: [],
 };
-

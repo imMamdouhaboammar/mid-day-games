@@ -1,14 +1,16 @@
 {
-  "name": "react-example",
+  "name": "yaqadha",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "tsx --test src/utils/playerProgress.test.ts",
+    "check": "npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

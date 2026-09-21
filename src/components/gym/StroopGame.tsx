@@ -89,6 +89,7 @@ export const StroopGame: React.FC<StroopGameProps> = ({ onFinish }) => {
     setRound(1);
     setScore(0);
     setStreak(0);
+    setHighestStreak(0);
     setIsDone(false);
     setIsShaking(false);
     setScorePopup(null);

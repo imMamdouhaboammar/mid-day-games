@@ -33,6 +33,13 @@ export const SocraticHint: React.FC<SocraticHintProps> = ({
           type="button"
           onClick={onFetchHint}
           disabled={isLoadingHint || Boolean(revealedHint)}
+          aria-label={
+            isLoadingHint
+              ? "جاري إعداد التلميح الاستنباطي"
+              : revealedHint
+                ? "تم عرض التلميح الاستنباطي"
+                : "عرض تلميح استنباطي"
+          }
           className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap focus-visible:ring-2 focus-visible:ring-amber-500 ${
             revealedHint
               ? "bg-slate-800/60 text-slate-500 border border-slate-800 cursor-not-allowed"

@@ -11,6 +11,11 @@ import { BreakModal } from "./components/BreakModal";
 import { Footer } from "./components/Footer";
 import { soundController } from "./utils/audioSynth";
 import { GAME_CONSTANTS } from "./config/gameConstants";
+import {
+  LAST_CASE_STORAGE_KEY,
+  PLAYER_STATS_STORAGE_KEY,
+  markDailyActivity,
+} from "./utils/playerProgress";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function App() {
@@ -23,19 +28,29 @@ export default function App() {
         return [...parsed, ...CURATED_CASES];
       }
     } catch {
-      // ignore
+      // Fall back to curated cases when local storage is unavailable or malformed.
     }
     return CURATED_CASES;
   });
 
-  const [currentCase, setCurrentCase] = useState<StoryCase>(CURATED_CASES[0]);
+  const [currentCase, setCurrentCase] = useState<StoryCase>(() => {
+    try {
+      const savedCaseId = localStorage.getItem(LAST_CASE_STORAGE_KEY);
+      const savedCase = cases.find((story) => story.id === savedCaseId);
+      if (savedCase) return savedCase;
+    } catch {
+      // Ignore storage failures and start from the first available case.
+    }
+    return cases[0] || CURATED_CASES[0];
+  });
+  const [caseStartedAt, setCaseStartedAt] = useState(() => Date.now());
 
   const [playerStats, setPlayerStats] = useState<PlayerStats>(() => {
     try {
-      const saved = localStorage.getItem("yaqadha_player_stats");
-      if (saved) return JSON.parse(saved);
+      const saved = localStorage.getItem(PLAYER_STATS_STORAGE_KEY);
+      if (saved) return { ...INITIAL_PLAYER_STATS, ...JSON.parse(saved) };
     } catch {
-      // ignore
+      // Start from a clean profile if persisted state cannot be read.
     }
     return INITIAL_PLAYER_STATS;
   });
@@ -68,48 +83,67 @@ export default function App() {
 
   useEffect(() => {
     try {
-      localStorage.setItem("yaqadha_player_stats", JSON.stringify(playerStats));
+      localStorage.setItem(PLAYER_STATS_STORAGE_KEY, JSON.stringify(playerStats));
     } catch {
-      // ignore
+      // Progress remains available for the current session if storage is blocked.
     }
   }, [playerStats]);
 
-  const handleSelectCase = (c: StoryCase) => {
+  useEffect(() => {
+    try {
+      if (currentCase?.id) {
+        localStorage.setItem(LAST_CASE_STORAGE_KEY, currentCase.id);
+      }
+    } catch {
+      // Remembering the last case is a convenience, not a critical path.
+    }
+  }, [currentCase]);
+
+  const handleSelectCase = (storyCase: StoryCase) => {
     soundController.playSfx("click");
-    setCurrentCase(c);
+    setCurrentCase(storyCase);
+    setCaseStartedAt(Date.now());
     setActiveTab("reader");
   };
 
   const handleSolveCase = (score: number, verdict: string, userTheory?: string) => {
-    const already = playerStats.solvedCases.some((s) => s.caseId === currentCase.id);
+    const elapsedSeconds = Math.max(1, Math.round((Date.now() - caseStartedAt) / 1000));
     const newRecord: SolvedRecord = {
       caseId: currentCase.id,
       caseTitle: currentCase.title,
       solvedAt: new Date().toLocaleDateString("ar-EG"),
       score,
-      timeSpentSeconds: 180,
+      timeSpentSeconds: elapsedSeconds,
       verdict,
       userTheory,
     };
 
-    setPlayerStats((prev) => ({
-      ...prev,
-      sharpnessScore:
-        prev.sharpnessScore +
-        (already ? GAME_CONSTANTS.POINTS.CASE_SOLVED_REPEAT : GAME_CONSTANTS.POINTS.CASE_SOLVED_NEW),
-      casesSolvedCount: already ? prev.casesSolvedCount : prev.casesSolvedCount + 1,
-      totalBreakMinutes: prev.totalBreakMinutes + (currentCase.estimatedMinutes || 5),
-      solvedCases: [newRecord, ...prev.solvedCases.filter((s) => s.caseId !== currentCase.id)],
-    }));
+    setPlayerStats((prev) => {
+      const alreadySolved = prev.solvedCases.some((s) => s.caseId === currentCase.id);
+      const updated: PlayerStats = {
+        ...prev,
+        sharpnessScore:
+          prev.sharpnessScore +
+          (alreadySolved
+            ? GAME_CONSTANTS.POINTS.CASE_SOLVED_REPEAT
+            : GAME_CONSTANTS.POINTS.CASE_SOLVED_NEW),
+        casesSolvedCount: alreadySolved ? prev.casesSolvedCount : prev.casesSolvedCount + 1,
+        totalBreakMinutes: prev.totalBreakMinutes + Math.max(1, currentCase.estimatedMinutes || 5),
+        solvedCases: [newRecord, ...prev.solvedCases.filter((s) => s.caseId !== currentCase.id)],
+      };
+      return markDailyActivity(updated);
+    });
   };
 
   const handleScoreEarnedFromGym = (points: number) => {
-    setPlayerStats((prev) => ({
-      ...prev,
-      sharpnessScore: prev.sharpnessScore + points,
-      quickGamesPlayed: prev.quickGamesPlayed + 1,
-      totalBreakMinutes: prev.totalBreakMinutes + 2,
-    }));
+    setPlayerStats((prev) =>
+      markDailyActivity({
+        ...prev,
+        sharpnessScore: prev.sharpnessScore + points,
+        quickGamesPlayed: prev.quickGamesPlayed + 1,
+        totalBreakMinutes: prev.totalBreakMinutes + 2,
+      }),
+    );
   };
 
   const handleCaseCreated = (newCase: StoryCase) => {
@@ -119,16 +153,17 @@ export default function App() {
         const customOnly = updated.filter((c) => c.isCustomAi);
         localStorage.setItem("yaqadha_custom_cases", JSON.stringify(customOnly));
       } catch {
-        // ignore
+        // Keep the generated case in the current session even if storage is blocked.
       }
       return updated;
     });
     setCurrentCase(newCase);
+    setCaseStartedAt(Date.now());
     setActiveTab("reader");
   };
 
   const handleToggleTimer = () => {
-    setIsTimerRunning(!isTimerRunning);
+    setIsTimerRunning((running) => !running);
   };
 
   const handleResetTimer = (minutes: number) => {
@@ -138,6 +173,13 @@ export default function App() {
 
   return (
     <div className="min-h-dvh bg-[#0a0e17] text-[#f1f5f9] flex flex-col font-ui selection:bg-amber-600/30 selection:text-amber-200">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:z-[70] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-amber-500 focus:text-slate-950 focus:font-bold"
+      >
+        انتقل إلى المحتوى الرئيسي
+      </a>
+
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -154,7 +196,7 @@ export default function App() {
         onExtend={handleResetTimer}
       />
 
-      <main className="flex-1 py-4 sm:py-6">
+      <main id="main-content" tabIndex={-1} className="flex-1 py-4 sm:py-6">
         <AnimatePresence mode="wait">
           {activeTab === "cases" && (
             <motion.div
@@ -167,6 +209,7 @@ export default function App() {
               <CasesList
                 cases={cases}
                 solvedCaseIds={solvedCaseIds}
+                playerStats={playerStats}
                 onSelectCase={handleSelectCase}
                 onOpenAiGenerator={() => setActiveTab("custom-case")}
                 onOpenQuickGym={() => setActiveTab("quick-gym")}
@@ -223,7 +266,7 @@ export default function App() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2 }}
             >
-              <BrainDashboard playerStats={playerStats} />
+              <BrainDashboard playerStats={playerStats} cases={cases} />
             </motion.div>
           )}
         </AnimatePresence>

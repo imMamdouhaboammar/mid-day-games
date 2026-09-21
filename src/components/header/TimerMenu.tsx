@@ -95,6 +95,7 @@ export const TimerMenu: React.FC<TimerMenuProps> = ({
           onToggleTimer();
           onClose();
         }}
+        aria-label={isTimerRunning ? "إيقاف مؤقت الاستراحة" : "بدء مؤقت الاستراحة"}
         className={`w-full py-1.5 rounded-lg font-bold text-center transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 ${
           isTimerRunning
             ? "bg-red-950/80 text-red-300 hover:bg-red-900"
