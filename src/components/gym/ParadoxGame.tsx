@@ -114,6 +114,7 @@ export const ParadoxGame: React.FC<ParadoxGameProps> = ({ onFinish }) => {
     setIdx(0);
     setScore(0);
     setStreak(0);
+    setHighestStreak(0);
     setIsDone(false);
     setSelectedOpt(null);
     setShowResult(false);
