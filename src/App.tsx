@@ -173,6 +173,13 @@ export default function App() {
 
   return (
     <div className="min-h-dvh bg-[#0a0e17] text-[#f1f5f9] flex flex-col font-ui selection:bg-amber-600/30 selection:text-amber-200">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:z-[70] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-amber-500 focus:text-slate-950 focus:font-bold"
+      >
+        انتقل إلى المحتوى الرئيسي
+      </a>
+
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -189,7 +196,7 @@ export default function App() {
         onExtend={handleResetTimer}
       />
 
-      <main className="flex-1 py-4 sm:py-6">
+      <main id="main-content" tabIndex={-1} className="flex-1 py-4 sm:py-6">
         <AnimatePresence mode="wait">
           {activeTab === "cases" && (
             <motion.div
